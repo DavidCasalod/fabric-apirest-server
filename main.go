@@ -1,27 +1,37 @@
 package main
 
 import (
+	"encoding/json"
+	fabric "fabric/web"
 	"fmt"
 	"os"
-	"rest-api-go/web"
 )
 
 func main() {
+	//Parse chaincode functions as an array of strings
+	chaincodeFunctionsJSON := os.Getenv("CHAINCODE_FUNCTIONS")
+	var chaincodeFunctions []string
+	err := json.Unmarshal([]byte(chaincodeFunctionsJSON), &chaincodeFunctions)
+	if err != nil {
+		panic(err)
+	}
 	//Initialize setup for Org1
-	cryptoPath := "../../test-network/organizations/peerOrganizations/org1.example.com"
-	orgConfig := web.OrgSetup{
-		OrgName:      "Org1", os.Getenv("ORG_NAME")
-		MSPID:        "Org1MSP",
-		CertPath:     cryptoPath + "/users/User1@org1.example.com/msp/signcerts/cert.pem",
-		KeyPath:      cryptoPath + "/users/User1@org1.example.com/msp/keystore/",
-		TLSCertPath:  cryptoPath + "/peers/peer0.org1.example.com/tls/ca.crt",
-		PeerEndpoint: "localhost:7051",
-		GatewayPeer:  "peer0.org1.example.com",
+	orgConfig := fabric.OrgSetup{
+		OrgName:            os.Getenv("ORG_NAME"),
+		MSPID:              os.Getenv("MSPID"),
+		CertPath:           os.Getenv("CERTPATH"),
+		KeyPath:            os.Getenv("KEYPATH"),
+		TLSCertPath:        os.Getenv("TLSCERTPATH"),
+		PeerEndpoint:       os.Getenv("PEERENDPOINT"),
+		ChaincodeName:      os.Getenv("CHAINCODE_NAME"),
+		ChannelId:          os.Getenv("CHANNEL_ID"),
+		ChaincodeFunctions: chaincodeFunctions,
+		GatewayPeer:        os.Getenv("GATEWAYPEER"),
 	}
 
-	orgSetup, err := web.Initialize(orgConfig)
+	orgSetup, err := fabric.Initialize(orgConfig)
 	if err != nil {
 		fmt.Println("Error initializing setup for Org1: ", err)
 	}
-	web.Serve(web.OrgSetup(*orgSetup))
+	fabric.Serve(fabric.OrgSetup(*orgSetup))
 }

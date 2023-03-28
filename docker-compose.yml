@@ -2,12 +2,7 @@ version: "3.9"
 
 services:
   myapp:
-    image: myapp
-    environment:
-      ORG_NAME: "Org1"
-      MSPID:        "Org1MSP",
-		  CertPath:     cryptoPath + "/users/User1@org1.example.com/msp/signcerts/cert.pem",
-		  KeyPath:      cryptoPath + "/users/User1@org1.example.com/msp/keystore/",
-		  TLSCertPath:  cryptoPath + "/peers/peer0.org1.example.com/tls/ca.crt",
-		  PeerEndpoint: "localhost:7051",
-		  GatewayPeer:  "peer0.org1.example.com",
+    image: fabric_server
+    env_file:
+      - .env
+     
