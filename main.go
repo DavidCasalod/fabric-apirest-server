@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	fabric "fabric/web"
 	"fmt"
 	"os"
@@ -9,12 +8,8 @@ import (
 
 func main() {
 	//Parse chaincode functions as an array of strings
-	chaincodeFunctionsJSON := os.Getenv("CHAINCODE_FUNCTIONS")
-	var chaincodeFunctions []string
-	err := json.Unmarshal([]byte(chaincodeFunctionsJSON), &chaincodeFunctions)
-	if err != nil {
-		panic(err)
-	}
+	chaincodeFunctions := []string{os.Getenv("CHAINCODE_FUNCTIONS")}
+
 	//Initialize setup for Org1
 	orgConfig := fabric.OrgSetup{
 		OrgName:            os.Getenv("ORG_NAME"),

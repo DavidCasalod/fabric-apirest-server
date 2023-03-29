@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) error {
+func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 
 	queryParams := r.URL.Query()
 	didID := queryParams.Get("didId")
@@ -17,19 +17,19 @@ func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) error {
 
 		// Check if the DID method is Fabric
 		if method != "fabric" {
-			return fmt.Errorf("unsupported DID method: %s", method)
+			fmt.Fprintf(w, "unsupported DID method: %s", method)
 		}
-		return fmt.Errorf("invalid DID format: %s", didID)
+		fmt.Fprintf(w, "invalid DID format: %s", didID)
 	}
 
 	network := setup.Gateway.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
 	evaluateResponse, err := contract.EvaluateTransaction(setup.ChaincodeFunctions[0], didID)
 	if err != nil {
-		return fmt.Errorf("Error: %s", err)
+		fmt.Fprintf(w, "Error: %s", err)
 	}
 	fmt.Fprintf(w, "Response: %s", evaluateResponse)
-	return nil
+
 }
 
 // 	doc, err := queryDID(didID, contract)

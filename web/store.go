@@ -18,7 +18,8 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	didDoc := &did.Doc{}
 	err := json.Unmarshal([]byte(doc), didDoc)
 	if err != nil {
-		fmt.Fprintf(w, "failed to unmarshal DID document: %w", err)
+		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
+		return
 	}
 	didIDsplited := strings.Split(didDoc.ID, ":")
 	method := didIDsplited[1]
@@ -29,7 +30,7 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 
 	network := setup.Gateway.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
-	args := doc
+	args := []string{doc}
 	txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))
 	if err != nil {
 		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
