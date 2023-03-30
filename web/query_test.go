@@ -11,8 +11,8 @@ import (
 
 func TestQuery(t *testing.T) {
 	t.Run("test query DID success", func(t *testing.T) {
-		// Create a mock OrgSetup
-		mockSetup := &mock.MockOrgSetup{}
+		// Create a new OrgSetup struct with the mock Gateway
+		mockorgSetup := &mock.MockOrgSetup{}
 
 		// Create a test request
 		req, err := http.NewRequest("GET", "/query?didId=did:fabric:1234", nil)
@@ -24,7 +24,7 @@ func TestQuery(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		// Call the Query function with the mock setup and test request
-		mockSetup.Query(rr, req)
+		mockorgSetup.Query(rr, req, mockorgSetup)
 		expectedResponse := "doc"
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rr.Code)
@@ -39,6 +39,7 @@ func TestQuery(t *testing.T) {
 		req, err := http.NewRequest("GET", "/query?didId=did:unsupported:1234", nil)
 		if err != nil {
 			t.Fatalf("Failed to create request: %v", err)
+
 		}
 
 		// Create a response recorder
