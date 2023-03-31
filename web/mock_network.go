@@ -5,7 +5,7 @@
 package fabric
 
 import (
-	fabric "fabric/web"
+
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,10 +35,10 @@ func (m *MockNetworkInt) EXPECT() *MockNetworkIntMockRecorder {
 }
 
 // GetContract mocks base method.
-func (m *MockNetworkInt) GetContract(arg0 string) fabric.ContractInt {
+func (m *MockNetworkInt) GetContract(arg0 string) ContractInt {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetContract", arg0)
-	ret0, _ := ret[0].(fabric.ContractInt)
+	ret0, _ := ret[0].(ContractInt)
 	return ret0
 }
 

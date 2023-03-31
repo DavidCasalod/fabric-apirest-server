@@ -6,8 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mocks "scm.atosresearch.eu/ari/ledger_uself/ssi-ledgeruself-fabric/mocks"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,8 +15,9 @@ func TestQuery(t *testing.T) {
 	defer ctrl.Finish()
 	t.Run("test query DID success", func(t *testing.T) {
 		// Create a mock Gateway for testing purposes
-
-		mockGateway := mocks.NewMockGatewayInt(ctrl)
+		mockGateway := NewMockGatewayInt(ctrl)
+		mockContract := NewMockContractInt(ctrl)
+		mockNetwork := NewMockNetworkInt(ctrl)
 
 		// setup
 		setup := OrgSetup{
@@ -30,14 +29,20 @@ func TestQuery(t *testing.T) {
 			TLSCertPath:        "/path/to/tls-cert",
 			PeerEndpoint:       "peer0.org1.example.com:7051",
 			GatewayPeer:        "localhost:7051",
-			ChaincodeName:      "mycc",
-			ChannelId:          "mychannel",
+			ChaincodeName:      "TestChaincode",
+			ChannelId:          "TestChannel",
 			ChaincodeFunctions: []string{"queryDID"},
 			Gatewaytest:        mockGateway,
 		}
+		// Set up a mock contract error response
+		mockGateway.EXPECT().GetNetwork(gomock.Any()).Return(mockNetwork)
+		mockNetwork.EXPECT().GetContract(gomock.Any()).Return(mockContract)
+		didDoc := "did DOC"
+		didId := []byte("did:fabric:1234")
+		mockContract.EXPECT().EvaluateTransaction("queryDID", didId).Return([]byte(didDoc), nil)
 
 		// create a fake HTTP request
-		req, err := http.NewRequest("GET", "/?didId=did:fabric:abc123", nil)
+		req, err := http.NewRequest("GET", "/?didId=did:fabric:123", nil)
 		assert.NoError(t, err)
 
 		// create a fake HTTP response recorder
@@ -45,21 +50,15 @@ func TestQuery(t *testing.T) {
 
 		// Call the Query function with the mock setup and test request
 		setup.Query(rr, req)
-		expectedResponse := "doc"
+
 		// check the response
 		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, expectedResponse, rr.Body.String())
+		assert.Equal(t, didDoc, rr.Body.String())
 	})
 
 	t.Run("Test Query Invalid Method", func(t *testing.T) {
 		// Create a mock Gateway for testing purposes
-		mockContract := &MockContract{}
-		mockNetwork := &MockNetwork{
-			Contract: mockContract,
-		}
-		mockGateway := &MockGateway{
-			MockNetwork: mockNetwork,
-		}
+		mockGateway := NewMockGatewayInt(ctrl)
 		// Create an OrgSetup instance for testing
 		orgSetup := OrgSetup{
 			OrgName:            "TestOrg",
@@ -102,13 +101,7 @@ func TestQuery(t *testing.T) {
 
 	t.Run("Test Query Invalid Format", func(t *testing.T) {
 		// Create a mock Gateway for testing purposes
-		mockContract := &MockContract{}
-		mockNetwork := &MockNetwork{
-			Contract: mockContract,
-		}
-		mockGateway := &MockGateway{
-			MockNetwork: mockNetwork,
-		}
+		mockGateway := NewMockGatewayInt(ctrl)
 		// setup
 		setup := OrgSetup{
 			OrgName:            "Org1",
@@ -143,13 +136,9 @@ func TestQuery(t *testing.T) {
 	t.Run("TestQuery EvaluateTransaction Error - contract error", func(t *testing.T) {
 
 		// Create a mock Gateway for testing purposes
-		mockContract := &MockContract{}
-		mockNetwork := &MockNetwork{
-			Contract: mockContract,
-		}
-		mockGateway := &MockGateway{
-			MockNetwork: mockNetwork,
-		}
+		mockGateway := NewMockGatewayInt(ctrl)
+		mockContract := NewMockContractInt(ctrl)
+		mockNetwork := NewMockNetworkInt(ctrl)
 
 		// Create an OrgSetup instance for testing
 		orgSetup := OrgSetup{
@@ -168,11 +157,13 @@ func TestQuery(t *testing.T) {
 		}
 
 		// Set up a mock contract error response
+		mockGateway.GetNetwork("TestChannel")
+		mockNetwork.GetContract("TestChaincode")
 		mockError := fmt.Errorf("mock contract error")
 		didId := "did:fabric:1234"
-		mockContract.EvaluateTransaction("queryFunction", []byte(didId))
-		mockNetwork.GetContract("TestChaincode")
-		mockNetwork.GetNetwrok("TestChannel")
+		mockContract.EvaluateTransaction("queryFunction", didId)
+		mockContract.EXPECT().EvaluateTransaction("queryFunction", didId).Return(mockError, nil)
+
 		// Set up the test request with the DID ID query parameter
 		req, err := http.NewRequest("GET", "/path/to/query?didId=did:fabric:1234", nil)
 		if err != nil {
