@@ -33,7 +33,7 @@ func Initialize(setup OrgSetup) (*OrgSetup, error) {
 	if err != nil {
 		panic(err)
 	}
-	setup.Gateway = *gateway
+	setup.Gateway = gateway
 	log.Println("Initialization complete")
 	return &setup, nil
 }

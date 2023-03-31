@@ -7,6 +7,19 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
+type ContractInt interface {
+	EvaluateTransaction(name string, args ...string) ([]byte, error)
+}
+
+type NetworkInt interface {
+	GetContract(chaincodeName string) ContractInt
+}
+
+type GatewayInt interface {
+	GetNetwork(name string) NetworkInt
+	//Connect(id *identity.X509Identity, options ...func(gateway *client.Gateway) error) (*client.Gateway, error)
+}
+
 // OrgSetup contains organization's config to interact with the network.
 type OrgSetup struct {
 	OrgName            string
@@ -20,7 +33,8 @@ type OrgSetup struct {
 	ChaincodeName      string
 	ChannelId          string
 	ChaincodeFunctions []string
-	Gateway            client.Gateway
+	Gatewaytest        GatewayInt
+	Gateway            *client.Gateway
 }
 
 // Serve starts http web server.

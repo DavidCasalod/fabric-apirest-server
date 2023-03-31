@@ -1,115 +1,222 @@
 package fabric
 
 import (
-	mock "fabric/mock"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	mocks "scm.atosresearch.eu/ari/ledger_uself/ssi-ledgeruself-fabric/mocks/mock"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestQuery(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 	t.Run("test query DID success", func(t *testing.T) {
-		// Create a new OrgSetup struct with the mock Gateway
-		mockorgSetup := &mock.MockOrgSetup{}
+		// Create a mock Gateway for testing purposes
 
-		// Create a test request
-		req, err := http.NewRequest("GET", "/query?didId=did:fabric:1234", nil)
-		if err != nil {
-			t.Fatalf("Failed to create request: %v", err)
+		mockGateway := mocks.NewMockGatewayInt(ctrl)
+
+		// setup
+		setup := OrgSetup{
+			OrgName:            "Org1",
+			MSPID:              "Org1MSP",
+			CryptoPath:         "/path/to/crypto",
+			CertPath:           "/path/to/cert",
+			KeyPath:            "/path/to/key",
+			TLSCertPath:        "/path/to/tls-cert",
+			PeerEndpoint:       "peer0.org1.example.com:7051",
+			GatewayPeer:        "localhost:7051",
+			ChaincodeName:      "mycc",
+			ChannelId:          "mychannel",
+			ChaincodeFunctions: []string{"queryDID"},
+			Gatewaytest:        mockGateway,
 		}
 
-		// Create a response recorder
+		// create a fake HTTP request
+		req, err := http.NewRequest("GET", "/?didId=did:fabric:abc123", nil)
+		assert.NoError(t, err)
+
+		// create a fake HTTP response recorder
 		rr := httptest.NewRecorder()
 
 		// Call the Query function with the mock setup and test request
-		mockorgSetup.Query(rr, req, mockorgSetup)
+		setup.Query(rr, req)
 		expectedResponse := "doc"
-		require.NoError(t, err)
-		require.Equal(t, http.StatusOK, rr.Code)
-		require.Equal(t, rr.Body.String(), expectedResponse)
+		// check the response
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, expectedResponse, rr.Body.String())
 	})
 
-	t.Run("TestQueryInvalidMethod", func(t *testing.T) {
-		// Create a mock OrgSetup
-		mockSetup := &OrgSetup{}
+	t.Run("Test Query Invalid Method", func(t *testing.T) {
+		// Create a mock Gateway for testing purposes
+		mockContract := &MockContract{}
+		mockNetwork := &MockNetwork{
+			Contract: mockContract,
+		}
+		mockGateway := &MockGateway{
+			MockNetwork: mockNetwork,
+		}
+		// Create an OrgSetup instance for testing
+		orgSetup := OrgSetup{
+			OrgName:            "TestOrg",
+			MSPID:              "TestMSP",
+			CryptoPath:         "/path/to/crypto",
+			CertPath:           "/path/to/cert",
+			KeyPath:            "/path/to/key",
+			TLSCertPath:        "/path/to/tls/cert",
+			PeerEndpoint:       "localhost:12345",
+			GatewayPeer:        "peer0",
+			ChaincodeName:      "TestChaincode",
+			ChannelId:          "TestChannel",
+			ChaincodeFunctions: []string{"queryFunction"},
+			Gatewaytest:        mockGateway,
+		}
 
 		// Create a test request with an unsupported DID method
 		req, err := http.NewRequest("GET", "/query?didId=did:unsupported:1234", nil)
-		if err != nil {
-			t.Fatalf("Failed to create request: %v", err)
-
-		}
+		assert.NoError(t, err)
 
 		// Create a response recorder
 		rr := httptest.NewRecorder()
 
 		// Call the Query function with the mock setup and test request
-		mockSetup.Query(rr, req)
+		orgSetup.Query(rr, req)
+		expectedResponse := "unsupported DID method"
+		// check the response
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, expectedResponse, rr.Body.String())
+		// Call the Query function
+		handler := http.HandlerFunc(orgSetup.Query)
+		handler.ServeHTTP(rr, req)
 
-		// Check the response
-		if rr.Code != http.StatusOK {
-			t.Errorf("Unexpected status code: got %v, expected %v", rr.Code, http.StatusOK)
-		}
+		// Check the response status code
+		assert.Equal(t, http.StatusOK, rr.Code)
+		// Check the response body
+		assert.Contains(t, rr.Body.String(), "unsupported DID method")
 
-		expectedResponse := "unsupported DID method: unsupported"
-		if rr.Body.String() != expectedResponse {
-			t.Errorf("Unexpected response body: got %v, expected %v", rr.Body.String(), expectedResponse)
-		}
 	})
 
-	t.Run("TestQueryInvalidFormat", func(t *testing.T) {
-		// Create a mock OrgSetup
-		mockSetup := &mock.MockOrgSetup{}
+	t.Run("Test Query Invalid Format", func(t *testing.T) {
+		// Create a mock Gateway for testing purposes
+		mockContract := &MockContract{}
+		mockNetwork := &MockNetwork{
+			Contract: mockContract,
+		}
+		mockGateway := &MockGateway{
+			MockNetwork: mockNetwork,
+		}
+		// setup
+		setup := OrgSetup{
+			OrgName:            "Org1",
+			MSPID:              "Org1MSP",
+			CryptoPath:         "/path/to/crypto",
+			CertPath:           "/path/to/cert",
+			KeyPath:            "/path/to/key",
+			TLSCertPath:        "/path/to/tls-cert",
+			PeerEndpoint:       "peer0.org1.example.com:7051",
+			GatewayPeer:        "localhost:7051",
+			ChaincodeName:      "mycc",
+			ChannelId:          "mychannel",
+			ChaincodeFunctions: []string{"queryDID"},
+			Gatewaytest:        mockGateway,
+		}
 
-		// Create a test request with an invalid DID format
+		// create a fake HTTP request with an invalid DID format
 		req, err := http.NewRequest("GET", "/query?didId=invalidDIDFormat", nil)
-		if err != nil {
-			t.Fatalf("Failed to create request: %v", err)
-		}
+		assert.NoError(t, err)
 
 		// Create a response recorder
 		rr := httptest.NewRecorder()
 
-		// Call the Query function with the mock setup and test request
-		mockSetup.Query(rr, req)
+		// Call the Query function with setup and test request
+		setup.Query(rr, req)
 
-		// Check the response
-		if rr.Code != http.StatusOK {
-			t.Errorf("Unexpected status code: got %v, expected %v", rr.Code, http.StatusOK)
-		}
-
-		expectedResponse := "invalid DID format: invalidDIDFormat"
-		if rr.Body.String() != expectedResponse {
-			t.Errorf("Unexpected response body: got %v, expected %v", rr.Body.String(), expectedResponse)
-		}
+		// check the response
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Contains(t, rr.Body.String(), "invalid DID format")
 	})
 
-	t.Run("TestQueryEvaluateTransactionError", func(t *testing.T) {
-		// Create a mock OrgSetup
-		mockSetup := &mock.MockOrgSetup{}
+	t.Run("TestQuery EvaluateTransaction Error - contract error", func(t *testing.T) {
 
-		// Create a test request
-		req, err := http.NewRequest("GET", "/query?didId=did:fabric:1234", nil)
-		if err != nil {
-			t.Fatalf("Failed to create request: %v", err)
+		// Create a mock Gateway for testing purposes
+		mockContract := &MockContract{}
+		mockNetwork := &MockNetwork{
+			Contract: mockContract,
+		}
+		mockGateway := &MockGateway{
+			MockNetwork: mockNetwork,
 		}
 
-		// Create a response recorder
+		// Create an OrgSetup instance for testing
+		orgSetup := OrgSetup{
+			OrgName:            "TestOrg",
+			MSPID:              "TestMSP",
+			CryptoPath:         "/path/to/crypto",
+			CertPath:           "/path/to/cert",
+			KeyPath:            "/path/to/key",
+			TLSCertPath:        "/path/to/tls/cert",
+			PeerEndpoint:       "localhost:12345",
+			GatewayPeer:        "peer0",
+			ChaincodeName:      "TestChaincode",
+			ChannelId:          "TestChannel",
+			ChaincodeFunctions: []string{"queryFunction"},
+			Gatewaytest:        mockGateway,
+		}
+
+		// Set up a mock contract error response
+		mockError := fmt.Errorf("mock contract error")
+		didId := "did:fabric:1234"
+		mockContract.EvaluateTransaction("queryFunction", []byte(didId))
+		mockNetwork.GetContract("TestChaincode")
+		mockNetwork.GetNetwrok("TestChannel")
+		// Set up the test request with the DID ID query parameter
+		req, err := http.NewRequest("GET", "/path/to/query?didId=did:fabric:1234", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Create a ResponseRecorder to capture the response
 		rr := httptest.NewRecorder()
 
-		// Call the Query function with the mock setup and test request
-		mockSetup.Query(rr, req)
+		// Call the Query function
+		handler := http.HandlerFunc(orgSetup.Query)
+		handler.ServeHTTP(rr, req)
 
-		// Check the response
-		if rr.Code != http.StatusOK {
-			t.Errorf("Unexpected status code: got %v, expected %v", rr.Code, http.StatusOK)
-		}
-
-		expectedResponse := "Error: <some expected error>"
-		if rr.Body.String() != expectedResponse {
-			t.Errorf("Unexpected response body: got %v, expected %v", rr.Body.String(), expectedResponse)
-		}
+		// Check the response status code
+		assert.Equal(t, http.StatusOK, rr.Code)
+		// Check the response body
+		assert.Contains(t, rr.Body.String(), mockError.Error())
 	})
 }
+
+// type MockGateway struct {
+// 	*client.Gateway
+// }
+
+// func (g *MockGateway) GetNetwork(channelId string) *Network {
+// 	return Network{MockNetwork}
+// }
+
+// type MockNetwork struct {
+// 	*client.Network
+// }
+
+// func (n *MockNetwork) GetContract(name string) (*MockContract, error) {
+// 	return &MockContract{}, nil
+// }
+
+// type MockContract struct {
+// 	*client.Contract
+// }
+
+// func (c *MockContract) EvaluateTransaction(name string, args ...[]byte) ([]byte, error) {
+// 	if name == "queryFunction" && len(args) == 1 && string(args[0]) == "did:fabric:1234" {
+// 		// Return the expected response for the given inputs
+// 		return []byte("mock response"), nil
+// 	}
+// 	// Return an error for other inputs
+// 	return nil, fmt.Errorf("unexpected inputs")
+// }

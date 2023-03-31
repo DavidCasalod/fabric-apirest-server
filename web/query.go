@@ -22,7 +22,7 @@ func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "invalid DID format: %s", didID)
 	}
 
-	network := setup.Gateway.GetNetwork(setup.ChannelId)
+	network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
 	evaluateResponse, err := contract.EvaluateTransaction(setup.ChaincodeFunctions[0], didID)
 	if err != nil {
