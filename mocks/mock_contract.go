@@ -2,7 +2,7 @@
 // Source: fabric/web (interfaces: ContractInt)
 
 // Package mocks is a generated GoMock package.
-package mocks
+package fabric
 
 import (
 	reflect "reflect"

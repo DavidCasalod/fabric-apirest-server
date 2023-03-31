@@ -2,7 +2,7 @@
 // Source: fabric/web (interfaces: GatewayInt)
 
 // Package mocks is a generated GoMock package.
-package mocks
+package fabric
 
 import (
 	fabric "fabric/web"

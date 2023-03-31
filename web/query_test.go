@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mocks "scm.atosresearch.eu/ari/ledger_uself/ssi-ledgeruself-fabric/mocks/mock"
+	mocks "scm.atosresearch.eu/ari/ledger_uself/ssi-ledgeruself-fabric/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
