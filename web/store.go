@@ -28,7 +28,7 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "unsupported DID method: %s", method)
 	}
 
-	network := setup.Gateway.GetNetwork(setup.ChannelId)
+	network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
 	args := []string{doc}
 	txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))

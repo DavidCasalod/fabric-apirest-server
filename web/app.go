@@ -5,10 +5,31 @@ import (
 	"net/http"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"google.golang.org/grpc"
 )
+
+type proposalBuilder struct {
+	channelName     string
+	chaincodeName   string
+	transactionName string
+	transient       map[string][]byte
+	endorsingOrgs   []string
+	args            [][]byte
+}
+type CommitInt interface {
+	TransactionID() string
+}
+type TransactionInt interface {
+	Submit(opts ...grpc.CallOption) (CommitInt, error)
+	Result() []byte
+}
+type ProposalInt interface {
+	Endorse(opts ...grpc.CallOption) (TransactionInt, error)
+}
 
 type ContractInt interface {
 	EvaluateTransaction(name string, args ...string) ([]byte, error)
+	NewProposal(transactionName string, options ...client.ProposalOption) (ProposalInt, error)
 }
 
 type NetworkInt interface {

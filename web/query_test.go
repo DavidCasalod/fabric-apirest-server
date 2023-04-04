@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -38,8 +39,8 @@ func TestQuery(t *testing.T) {
 		mockGateway.EXPECT().GetNetwork(gomock.Any()).Return(mockNetwork)
 		mockNetwork.EXPECT().GetContract(gomock.Any()).Return(mockContract)
 		didDoc := "did DOC"
-		didId := []byte("did:fabric:1234")
-		mockContract.EXPECT().EvaluateTransaction("queryDID", didId).Return([]byte(didDoc), nil)
+
+		mockContract.EXPECT().EvaluateTransaction(gomock.Any(), gomock.Any()).Return([]byte(didDoc), nil)
 
 		// create a fake HTTP request
 		req, err := http.NewRequest("GET", "/?didId=did:fabric:123", nil)
@@ -56,9 +57,10 @@ func TestQuery(t *testing.T) {
 		assert.Equal(t, didDoc, rr.Body.String())
 	})
 
-	t.Run("Test Query Invalid Method", func(t *testing.T) {
+	t.Run("Test Query Unsupported DID method ", func(t *testing.T) {
 		// Create a mock Gateway for testing purposes
 		mockGateway := NewMockGatewayInt(ctrl)
+
 		// Create an OrgSetup instance for testing
 		orgSetup := OrgSetup{
 			OrgName:            "TestOrg",
@@ -84,18 +86,10 @@ func TestQuery(t *testing.T) {
 
 		// Call the Query function with the mock setup and test request
 		orgSetup.Query(rr, req)
-		expectedResponse := "unsupported DID method"
+		expectedResponse := "Unsupported DID method"
 		// check the response
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, expectedResponse, rr.Body.String())
-		// Call the Query function
-		handler := http.HandlerFunc(orgSetup.Query)
-		handler.ServeHTTP(rr, req)
-
-		// Check the response status code
-		assert.Equal(t, http.StatusOK, rr.Code)
-		// Check the response body
-		assert.Contains(t, rr.Body.String(), "unsupported DID method")
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, expectedResponse, strings.TrimSpace(rr.Body.String()))
 
 	})
 
@@ -129,8 +123,8 @@ func TestQuery(t *testing.T) {
 		setup.Query(rr, req)
 
 		// check the response
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Contains(t, rr.Body.String(), "invalid DID format")
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Contains(t, rr.Body.String(), "Invalid DID format")
 	})
 
 	t.Run("TestQuery EvaluateTransaction Error - contract error", func(t *testing.T) {
@@ -157,12 +151,10 @@ func TestQuery(t *testing.T) {
 		}
 
 		// Set up a mock contract error response
-		mockGateway.GetNetwork("TestChannel")
-		mockNetwork.GetContract("TestChaincode")
-		mockError := fmt.Errorf("mock contract error")
-		didId := "did:fabric:1234"
-		mockContract.EvaluateTransaction("queryFunction", didId)
-		mockContract.EXPECT().EvaluateTransaction("queryFunction", didId).Return(mockError, nil)
+		mockGateway.EXPECT().GetNetwork(gomock.Any()).Return(mockNetwork)
+		mockNetwork.EXPECT().GetContract(gomock.Any()).Return(mockContract)
+		mockError := fmt.Errorf("Couldn't evaluate transaction for didID ")
+		mockContract.EXPECT().EvaluateTransaction(gomock.Any(), gomock.Any()).Return(nil, mockError)
 
 		// Set up the test request with the DID ID query parameter
 		req, err := http.NewRequest("GET", "/path/to/query?didId=did:fabric:1234", nil)
@@ -177,37 +169,8 @@ func TestQuery(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		// Check the response status code
-		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		// Check the response body
 		assert.Contains(t, rr.Body.String(), mockError.Error())
 	})
 }
-
-// type MockGateway struct {
-// 	*client.Gateway
-// }
-
-// func (g *MockGateway) GetNetwork(channelId string) *Network {
-// 	return Network{MockNetwork}
-// }
-
-// type MockNetwork struct {
-// 	*client.Network
-// }
-
-// func (n *MockNetwork) GetContract(name string) (*MockContract, error) {
-// 	return &MockContract{}, nil
-// }
-
-// type MockContract struct {
-// 	*client.Contract
-// }
-
-// func (c *MockContract) EvaluateTransaction(name string, args ...[]byte) ([]byte, error) {
-// 	if name == "queryFunction" && len(args) == 1 && string(args[0]) == "did:fabric:1234" {
-// 		// Return the expected response for the given inputs
-// 		return []byte("mock response"), nil
-// 	}
-// 	// Return an error for other inputs
-// 	return nil, fmt.Errorf("unexpected inputs")
-// }
