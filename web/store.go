@@ -18,14 +18,15 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	didDoc := &did.Doc{}
 	err := json.Unmarshal([]byte(doc), didDoc)
 	if err != nil {
-		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
+		http.Error(w, "Error creating txn proposal: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	didIDsplited := strings.Split(didDoc.ID, ":")
 	method := didIDsplited[1]
 	// Check if the DID method is Fabric
 	if method != "fabric" {
-		fmt.Fprintf(w, "unsupported DID method: %s", method)
+		http.Error(w, "Unsupported DID method:"+method, http.StatusBadRequest)
+		return
 	}
 
 	network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
@@ -33,17 +34,17 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	args := []string{doc}
 	txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))
 	if err != nil {
-		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
+		http.Error(w, "Error creating txn proposal: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	txn_endorsed, err := txn_proposal.Endorse()
 	if err != nil {
-		fmt.Fprintf(w, "Error endorsing txn: %s", err)
+		http.Error(w, "Error endorsing txn: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	txn_committed, err := txn_endorsed.Submit()
 	if err != nil {
-		fmt.Fprintf(w, "Error submitting transaction: %s", err)
+		http.Error(w, "Error submitting transaction: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	fmt.Fprintf(w, "Transaction ID : %s Response: %s", txn_committed.TransactionID(), txn_endorsed.Result())

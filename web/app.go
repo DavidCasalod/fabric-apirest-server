@@ -8,14 +8,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type proposalBuilder struct {
-	channelName     string
-	chaincodeName   string
-	transactionName string
-	transient       map[string][]byte
-	endorsingOrgs   []string
-	args            [][]byte
-}
 type CommitInt interface {
 	TransactionID() string
 }
@@ -38,7 +30,6 @@ type NetworkInt interface {
 
 type GatewayInt interface {
 	GetNetwork(name string) NetworkInt
-	//Connect(id *identity.X509Identity, options ...func(gateway *client.Gateway) error) (*client.Gateway, error)
 }
 
 // OrgSetup contains organization's config to interact with the network.
