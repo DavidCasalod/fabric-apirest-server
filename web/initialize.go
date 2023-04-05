@@ -17,9 +17,18 @@ import (
 // Initialize the setup for the organization.
 func Initialize(setup OrgSetup) (*OrgSetup, error) {
 	log.Printf("Initializing connection for %s...\n", setup.OrgName)
-	clientConnection := setup.newGrpcConnection()
-	id := setup.newIdentity()
-	sign := setup.newSign()
+	clientConnection, err := setup.newGrpcConnection()
+	if err != nil {
+		return nil, err
+	}
+	id, err := setup.newIdentity()
+	if err != nil {
+		return nil, err
+	}
+	sign, err := setup.newSign()
+	if err != nil {
+		return nil, err
+	}
 
 	gateway, err := client.Connect(
 		id,
@@ -31,7 +40,7 @@ func Initialize(setup OrgSetup) (*OrgSetup, error) {
 		client.WithCommitStatusTimeout(1*time.Minute),
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	setup.Gateway = gateway
 	log.Println("Initialization complete")
@@ -39,10 +48,10 @@ func Initialize(setup OrgSetup) (*OrgSetup, error) {
 }
 
 // newGrpcConnection creates a gRPC connection to the Gateway server.
-func (setup OrgSetup) newGrpcConnection() *grpc.ClientConn {
+func (setup OrgSetup) newGrpcConnection() (*grpc.ClientConn, error) {
 	certificate, err := loadCertificate(setup.TLSCertPath)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	certPool := x509.NewCertPool()
@@ -51,50 +60,48 @@ func (setup OrgSetup) newGrpcConnection() *grpc.ClientConn {
 
 	connection, err := grpc.Dial(setup.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
 	if err != nil {
-		panic(fmt.Errorf("failed to create gRPC connection: %w", err))
+		return nil, fmt.Errorf("failed to create gRPC connection: %w", err)
 	}
 
-	return connection
+	return connection, nil
 }
 
-// newIdentity creates a client identity for this Gateway connection using an X.509 certificate.
-func (setup OrgSetup) newIdentity() *identity.X509Identity {
+func (setup OrgSetup) newIdentity() (*identity.X509Identity, error) {
 	certificate, err := loadCertificate(setup.CertPath)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	id, err := identity.NewX509Identity(setup.MSPID, certificate)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return id
+	return id, nil
 }
 
-// newSign creates a function that generates a digital signature from a message digest using a private key.
-func (setup OrgSetup) newSign() identity.Sign {
+func (setup OrgSetup) newSign() (identity.Sign, error) {
 	files, err := ioutil.ReadDir(setup.KeyPath)
 	if err != nil {
-		panic(fmt.Errorf("failed to read private key directory: %w", err))
+		return nil, fmt.Errorf("failed to read private key directory: %w", err)
 	}
 	privateKeyPEM, err := ioutil.ReadFile(path.Join(setup.KeyPath, files[0].Name()))
 
 	if err != nil {
-		panic(fmt.Errorf("failed to read private key file: %w", err))
+		return nil, fmt.Errorf("failed to read private key file: %w", err)
 	}
 
 	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	sign, err := identity.NewPrivateKeySign(privateKey)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return sign
+	return sign, nil
 }
 
 func loadCertificate(filename string) (*x509.Certificate, error) {
