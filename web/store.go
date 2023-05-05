@@ -13,19 +13,6 @@ import (
 
 func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 
-	// queryParams := r.URL.Query()
-	// fmt.Println("REQUEST:", queryParams)
-	// doc := queryParams.Get("didDoc")
-	// fmt.Println("DIDODC:", doc)
-
-	// // Unmarshal the DID document from the query response
-	// didDoc := &did.Doc{}
-	// err := json.Unmarshal([]byte(doc), didDoc)
-	// fmt.Println("JSON:", didDoc)
-	// if err != nil {
-	// 	http.Error(w, "Error creating txn proposal: "+err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body: "+err.Error(), http.StatusBadRequest)
