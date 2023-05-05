@@ -20,6 +20,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hyperledger/aries-framework-go/spi v0.0.0-20221025204933-b807371b6f1e // indirect
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.2.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kilic/bls12-381 v0.1.1-0.20210503002446-7b7597926c69 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect

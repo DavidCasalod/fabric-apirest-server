@@ -47,8 +47,11 @@ import (
 func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 
 	queryParams := r.URL.Query()
+	fmt.Println("REQUEST:", queryParams)
 	didID := queryParams.Get("didId")
+	fmt.Println("REQUEST:", didID)
 	parts := strings.Split(didID, ":")
+	fmt.Println("parts:", parts)
 
 	// Verify that the DID ID is valid
 	if len(parts) != 3 || parts[0] != "did" {
@@ -62,10 +65,12 @@ func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
+	// network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
+	network := setup.Gateway.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
 
-	evaluateResponse, err := contract.EvaluateTransaction(setup.ChaincodeFunctions[0], didID)
+	// evaluateResponse, err := contract.EvaluateTransaction(setup.ChaincodeFunctions[0], didID)
+	evaluateResponse, err := contract.EvaluateTransaction("readdid", didID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Couldn't evaluate transaction for didID '%s': %s", didID, err), http.StatusInternalServerError)
 		return

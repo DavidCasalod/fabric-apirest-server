@@ -4,9 +4,17 @@ import (
 	fabric "fabric/web"
 	"fmt"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file: ", err)
+		return
+	}
+
 	//Parse chaincode functions as an array of strings
 	chaincodeFunctions := []string{os.Getenv("CHAINCODE_FUNCTIONS")}
 
@@ -27,6 +35,8 @@ func main() {
 	orgSetup, err := fabric.Initialize(orgConfig)
 	if err != nil {
 		fmt.Println("Error initializing setup for Org1: ", err)
+		return // Add this line to prevent further execution in case of an error
 	}
 	fabric.Serve(fabric.OrgSetup(*orgSetup))
+
 }
