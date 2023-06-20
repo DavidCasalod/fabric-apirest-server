@@ -53,7 +53,7 @@ type OrgSetup struct {
 func Serve(setups OrgSetup) {
 	http.HandleFunc("/query", setups.Query)
 	http.HandleFunc("/store", setups.Store)
-	fmt.Println("Listening (http://localhost:3000/)...")
+	fmt.Println("Listening ..")
 	if err := http.ListenAndServe(":3000", nil); err != nil {
 		fmt.Println(err)
 	}

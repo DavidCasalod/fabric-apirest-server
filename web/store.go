@@ -1,3 +1,4 @@
+//
 package fabric
 
 import (
@@ -31,7 +32,6 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	doc, err := json.Marshal(didDocJSON)
-	fmt.Println("doc:", doc)
 	if err != nil {
 		http.Error(w, "Error marshaling didDocJSON: "+err.Error(), http.StatusBadRequest)
 		return
@@ -61,7 +61,6 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	transientDataMap["didDoc"] = []byte(doc)
 
 	// txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))
-	// txn_proposal, err := contract.NewProposal("createdid", client.WithArguments(args...))
 	txn_proposal, err := contract.NewProposal("createdid", client.WithArguments(args...), client.WithTransient(transientDataMap))
 
 	if err != nil {
@@ -78,5 +77,20 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error submitting transaction: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Transaction ID : %s Response: %s", txn_committed.TransactionID(), txn_endorsed.Result())
+
+	// Prepare the JSON response
+	resp := map[string]interface{}{
+		"transactionID": txn_committed.TransactionID(),
+		"result":        string(txn_endorsed.Result()),
+	}
+
+	respBytes, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, "Error marshaling response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(respBytes)
 }

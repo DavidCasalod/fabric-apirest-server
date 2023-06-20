@@ -1,11 +1,23 @@
-version: "3.9"
+version: "3.5"
 
 services:
-  VDRfabric:
-    image: fabric_server
+  vdrfabric:
+    image: fabric_server:test2
     env_file:
       - .env
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - VIRTUAL_PORT=${HOST_PORT}
+      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
     ports:
-      - "3000:3000"
+      - ${HOST_PORT}:${HOST_PORT}
     volumes:
-      - /home/david.casalod/go/src/github.com/david/fabric-samples:/home/david.casalod/go/src/github.com/david/fabric-samples
+      - ${SAMPLE_PATH}:${SAMPLE_PATH} 
+      - ${CERTPATH}:${CERTPATH}      
+      - ${KEYPATH}:${KEYPATH} 
+      - ${TLSCERTPATH}:${TLSCERTPATH} 
+    networks:
+      - uself_net
+networks:
+  uself_net:
+   external: true
