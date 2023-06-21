@@ -23,13 +23,13 @@ In production mode use the docker-compose.
 
 To test it you can use the following command to create a new did and store it into de H-fabric blockchain: 
 ```
- curl -X POST -H "Content-Type: application/json" -d '{"didDoc": {"@context": "https://www.w3.org/ns/did/v1", "id": "did:fabric:1444", "publicKey": [{"id": "did:fabric:123456789abcdefghi#keys-1", "type": "Ed25519VerificationKey2018", "controller": "did:fabric:123456789abcdefghi", "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"}]}}' http://vdrfabric.dev4.ari-bip.eu:3000/store
+ curl -X POST -H "Content-Type: application/json" -d '{"didDoc": {"@context": "https://www.w3.org/ns/did/v1", "id": "did:fabric:44455", "publicKey": [{"id": "did:fabric:123456789abcdefghi#keys-1", "type": "Ed25519VerificationKey2018", "controller": "did:fabric:123456789abcdefghi", "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"}]}}' https://vdrfabric.dev4.ari-bip.eu/store
 ```
 
 And to read it from the fabric network you can use the following http call: 
 ```
 
-curl -X GET "http://vdrfabric.dev4.ari-bip.eu:3000/query?didId=did:fabric:test111"
+curl -X GET "https://vdrfabric.dev4.ari-bip.eu/query?didId=did:fabric:44455"
 ```
 
 To check the certs:
