@@ -11,7 +11,7 @@ import (
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
-func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
+func (setup OrgSetup) Update(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -60,7 +60,7 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	transientDataMap["didDoc"] = []byte(doc)
 
 	// txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))
-	txn_proposal, err := contract.NewProposal("createdid", client.WithArguments(args...), client.WithTransient(transientDataMap))
+	txn_proposal, err := contract.NewProposal("updatedid", client.WithArguments(args...), client.WithTransient(transientDataMap))
 
 	if err != nil {
 		http.Error(w, "Error creating txn proposal: "+err.Error(), http.StatusBadRequest)

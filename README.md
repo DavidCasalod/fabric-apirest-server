@@ -31,6 +31,10 @@ And to read it from the fabric network you can use the following http call:
 
 curl -X GET "https://vdrfabric.dev4.ari-bip.eu/query?didId=did:fabric:44455"
 ```
+To test it you can use the following command to UPDATE a new did and store it into de H-fabric blockchain: 
+```
+ curl -X POST -H "Content-Type: application/json" -d '{"didDoc": {"@context": "https://www.w3.org/ns/did/v1", "id": "did:fabric:44455", "publicKey": [{"id": "did:fabric:123456789abcdefghi#keys-1", "type": "Ed25519VerificationKey2018", "controller": "did:fabric:123456789abcdefghi", "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"}]}}' https://vdrfabric.dev4.ari-bip.eu/update
+```
 
 To check the certs:
 ```
