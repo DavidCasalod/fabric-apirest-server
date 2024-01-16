@@ -104,13 +104,13 @@
 // 	return sign, nil
 // }
 
-// func loadCertificate(filename string) (*x509.Certificate, error) {
-// 	certificatePEM, err := ioutil.ReadFile(filename)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to read certificate file: %w", err)
-// 	}
-// 	return identity.CertificateFromPEM(certificatePEM)
-// }
+//	func loadCertificate(filename string) (*x509.Certificate, error) {
+//		certificatePEM, err := ioutil.ReadFile(filename)
+//		if err != nil {
+//			return nil, fmt.Errorf("failed to read certificate file: %w", err)
+//		}
+//		return identity.CertificateFromPEM(certificatePEM)
+//	}
 package fabric
 
 import (

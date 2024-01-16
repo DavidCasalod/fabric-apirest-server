@@ -46,8 +46,8 @@ func (setup OrgSetup) Update(w http.ResponseWriter, r *http.Request) {
 	didIDsplited := strings.Split(didDoc.ID, ":")
 	method := didIDsplited[1]
 	fmt.Println("ID:", didDoc.ID)
-	// Check if the DID method is Fabric
-	if method != "fabric" {
+	// Check if the DID method is Priv
+	if method != "priv" {
 		http.Error(w, "Unsupported DID method:"+method, http.StatusBadRequest)
 		return
 	}

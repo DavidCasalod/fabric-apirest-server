@@ -19,8 +19,8 @@ func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	method := parts[1]
-	// Verify that the DID method is Fabric
-	if method != "fabric" {
+	// Verify that the DID method is Priv
+	if method != "priv" {
 		http.Error(w, "Unsupported DID method", http.StatusBadRequest)
 		return
 	}
