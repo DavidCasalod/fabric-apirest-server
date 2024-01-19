@@ -1,0 +1,18 @@
+POST https://vdrfabric.preprod.ari-bip.eu/store
+Content-Type: application/json
+accept: application/json
+
+{
+  "didDoc": {
+    "@context": "https://www.w3.org/ns/did/v1",
+    "id": "did:priv:11",
+    "publicKey": [
+      {
+        "id": "did:priv:123456789abcdefghi#keys-1",
+        "type": "Ed25519VerificationKey2018",
+        "controller": "did:priv:11",
+        "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+      }
+    ]
+  }
+}

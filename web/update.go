@@ -25,19 +25,21 @@ func (setup OrgSetup) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error unmarshaling request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	didDocJSON, ok := requestBody["didDoc"].(map[string]interface{})
+	didDocData, ok := requestBody["didDoc"]
 	if !ok {
 		http.Error(w, "Missing required parameter: didDoc", http.StatusBadRequest)
 		return
 	}
-	doc, err := json.Marshal(didDocJSON)
+
+	didDocJSON, err := json.Marshal(didDocData)
 	if err != nil {
-		http.Error(w, "Error marshaling didDocJSON: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Error marshaling didDocData: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	// Unmarshal the DID document from the query response
 	didDoc := &did.Doc{}
-	er := json.Unmarshal([]byte(doc), didDoc)
+	er := json.Unmarshal([]byte(didDocJSON), didDoc)
 	if er != nil {
 		http.Error(w, "Error creating txn proposal: "+er.Error(), http.StatusBadRequest)
 		return
@@ -57,7 +59,7 @@ func (setup OrgSetup) Update(w http.ResponseWriter, r *http.Request) {
 	contract := network.GetContract(setup.ChaincodeName)
 	args := []string{didDoc.ID}
 	transientDataMap := make(map[string][]byte)
-	transientDataMap["didDoc"] = []byte(doc)
+	transientDataMap["didDoc"] = []byte(didDocJSON)
 
 	// txn_proposal, err := contract.NewProposal(setup.ChaincodeFunctions[1], client.WithArguments(args...))
 	txn_proposal, err := contract.NewProposal("updatedid", client.WithArguments(args...), client.WithTransient(transientDataMap))

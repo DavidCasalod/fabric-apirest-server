@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   vdrfabric:
-    image: fabric_server:test2
+    image: vdrriv:local 
     env_file:
       - .env
     environment:
@@ -21,3 +21,25 @@ services:
 networks:
   uself_net:
    external: true
+
+#    version: "3.5"
+
+# services:
+#   vdrfabric:
+#     image:   registry.atosresearch.eu:18487/ari/ledgeruself/fabric-apirest-server:preprod-Supdate
+#     environment:
+#       - VIRTUAL_HOST=vdrfabric.preprod.ari-bip.eu
+#       - VIRTUAL_PORT=3000
+#       - LETSENCRYPT_HOST=vdrfabric.preprod.ari-bip.eu
+
+#     volumes:
+
+#       - ${CERTPATH}:${CERTPATH}     
+#       - ${KEYPATH}:${KEYPATH} 
+#       - ${TLSCERTPATH}:${TLSCERTPATH} 
+    
+#     networks:
+#       - uself_net
+# networks:
+#   uself_net:
+#    external: true

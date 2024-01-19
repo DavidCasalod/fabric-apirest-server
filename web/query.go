@@ -1,6 +1,7 @@
 package fabric
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,5 +37,29 @@ func (setup OrgSetup) Query(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%s", evaluateResponse)
+	// Unmarshal the response into a map
+	var responseMap map[string]interface{}
+	err = json.Unmarshal(evaluateResponse, &responseMap)
+	if err != nil {
+		http.Error(w, "Error unmarshaling evaluate response: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Extract the didDoc content
+	didDocContent, ok := responseMap["didDoc"]
+	if !ok {
+		http.Error(w, "didDoc not found in response", http.StatusInternalServerError)
+		return
+	}
+
+	// Marshal the didDoc content back to JSON
+	didDocJSON, err := json.Marshal(didDocContent)
+	if err != nil {
+		http.Error(w, "Error marshaling didDoc content: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the didDoc JSON as the response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(didDocJSON)
 }

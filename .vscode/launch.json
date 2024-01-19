@@ -1,0 +1,42 @@
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "Launch Server",
+//             "type": "go",
+//             "request": "launch",
+//             "debugAdapter": "legacy",
+//             "mode": "auto",
+//             "program": "/home/david.casalod/workdir/github/uself-fabric-server/main.go",
+//             "host": "212.32.251.169",
+//             "port": 44444,
+//               "env": {
+//                 //8
+//                 "SAMPLE_PATH": "/home/david.casalod/go/src/github.com/david/fabric-samples",
+//                 "CRYPTOPATH"=${SAMPLE_PATH}/test-network/organizations/peerOrganizations/org1.example.com
+//                 "CERTPATH"=/home/ariuserbip/fabric/credentials_ss/cert.pem
+//                 "KEYPATH"=/home/ariuserbip/fabric/credentials_ss/keystore/
+//                 "TLSCERTPATH"=/home/ariuserbip/fabric/credentials_ss/ca.crt
+//                 # CERTPATH=/home/david.casalod/workdir/ledgerUself/nuevo/ssi-ledgeruself-fabric/certs/cert.pem
+//                 # KEYPATH=/home/david.casalod/workdir/ledgerUself/nuevo/ssi-ledgeruself-fabric/certs/keystore
+//                 # TLSCERTPATH=/home/david.casalod/workdir/ledgerUself/nuevo/ssi-ledgeruself-fabric/certs/ca.crt
+//                 "ORG_NAME"=Org1
+//                 "MSPID"=Org1MSP
+//                 "PEERENDPOINT"=212.32.251.170:7051
+//                 # "PEERENDPOINT"=localhost:7051
+//                 "GATEAWAYPEER"=peer0.org1.example.com
+//                 "CHAINCODE_NAME"=VDR-chaincode
+//                 "CHANNEL_ID"=mychannel
+//                 "CHAINCODE_FUNCTIONS"=readdid,createdid,updatedid
+//                 "HOST_PORT"=3000
+//                 "FABRIC_PORT"=7051
+//                 "VIRTUAL_HOST"=vdrfabric.dev4.ari-bip.eu
+//                 "VDR_IMAGE"=fabric_server:test4
+//               },
+//               "args": ["start" ]
+//           }
+//     ]
+// }

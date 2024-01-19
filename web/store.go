@@ -38,7 +38,7 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Unmarshal the DID document from the query response
-	var didDoc did.Doc
+	didDoc := &did.Doc{}
 	er := json.Unmarshal([]byte(didDocJSON), didDoc)
 	if er != nil {
 		http.Error(w, "Error creating txn proposal: "+er.Error(), http.StatusBadRequest)
@@ -54,7 +54,7 @@ func (setup OrgSetup) Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
+	//network := setup.Gatewaytest.GetNetwork(setup.ChannelId)
 	network := setup.Gateway.GetNetwork(setup.ChannelId)
 	contract := network.GetContract(setup.ChaincodeName)
 	args := []string{didDoc.ID}
