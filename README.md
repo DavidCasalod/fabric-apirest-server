@@ -4,7 +4,7 @@
 Go to te directory where you have the test-network and run the following commands: 
 ### Start network with channel
 ```
-clear
+./network.sh up createChannel -ca -s couchdb
 ```
 ### Deploy smart contract 
 ```
